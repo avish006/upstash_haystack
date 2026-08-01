@@ -84,7 +84,7 @@ class UpstashDocumentStore:
 
         :returns: The total number of documents in the Upstash Vector index.
         """
-        return self._get_index.info().vector_count
+        return self._get_index().info().vector_count
 
     def write_documents(
         self,
@@ -112,7 +112,7 @@ class UpstashDocumentStore:
 
         if policy in [DuplicatePolicy.SKIP, DuplicatePolicy.FAIL]:
             # Fetch existing to handle SKIP/FAIL
-            existing = self._get_index.fetch([doc.id for doc in documents])
+            existing = self._get_index().fetch([doc.id for doc in documents])
             existing_ids = [res.id for res in existing if res is not None]
             if existing_ids:
                 if policy == DuplicatePolicy.FAIL:
@@ -140,7 +140,7 @@ class UpstashDocumentStore:
 
         # Upsert in batches of 1000
         for i in range(0, len(vectors), 1000):
-            self._get_index.upsert(vectors=vectors[i : i + 1000])
+            self._get_index().upsert(vectors=vectors[i : i + 1000])
 
         return len(documents)
 
@@ -155,7 +155,7 @@ class UpstashDocumentStore:
 
         # Delete in batches
         for i in range(0, len(document_ids), 1000):
-            self._get_index.delete(document_ids[i : i + 1000])
+            self._get_index().delete(document_ids[i : i + 1000])
 
     def filter_documents(self, filters: dict[str, Any] | None = None) -> list[Document]:
         """
@@ -170,10 +170,10 @@ class UpstashDocumentStore:
         if filters:
             filter_str = _normalize_filters(filters)
 
-        dim = self._get_index.info().dimension
+        dim = self._get_index().info().dimension
         dummy_vector = [1.0] + [0.0] * (dim - 1)
 
-        results = self._get_index.query(
+        results = self._get_index().query(
             vector=dummy_vector,
             top_k=TOP_K_LIMIT,
             filter=filter_str,
