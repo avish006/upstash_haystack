@@ -183,7 +183,7 @@ def test_filter_documents(mock_index, monkeypatch):
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    "UPSTASH_VECTOR_REST_URL" not in os.environ or "UPSTASH_VECTOR_REST_TOKEN" not in os.environ,
+    not os.environ.get("UPSTASH_VECTOR_REST_URL") or not os.environ.get("UPSTASH_VECTOR_REST_TOKEN"),
     reason="No UPSTASH_VECTOR_REST_URL or UPSTASH_VECTOR_REST_TOKEN provided",
 )
 class TestUpstashDocumentStore:
