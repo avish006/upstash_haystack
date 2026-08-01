@@ -197,7 +197,7 @@ class TestUpstashDocumentStore:
     become consistent.
     """
 
-    SLEEP = 1  # seconds to wait for Upstash eventual consistency
+    SLEEP = 2  # seconds to wait for Upstash eventual consistency (CI needs more than local)
 
     @pytest.fixture(autouse=True)
     def document_store(self):

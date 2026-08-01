@@ -48,6 +48,7 @@ jobs:
         run: hatch run test:unit
 
       - name: Check secrets are available
+        if: matrix.python-version == '3.12'
         env:
           UPSTASH_VECTOR_REST_URL: ${{ secrets.UPSTASH_VECTOR_REST_URL }}
           UPSTASH_VECTOR_REST_TOKEN: ${{ secrets.UPSTASH_VECTOR_REST_TOKEN }}
@@ -58,6 +59,7 @@ jobs:
           echo "TOKEN length: ${#UPSTASH_VECTOR_REST_TOKEN}"
 
       - name: Integration tests
+        if: matrix.python-version == '3.12'
         env:
           UPSTASH_VECTOR_REST_URL: ${{ secrets.UPSTASH_VECTOR_REST_URL }}
           UPSTASH_VECTOR_REST_TOKEN: ${{ secrets.UPSTASH_VECTOR_REST_TOKEN }}
