@@ -1,80 +1,91 @@
-# Custom Component Template
+# upstash-haystack
 
-A template repository for creating custom [Haystack](https://haystack.deepset.ai/) components and publishing them as standalone Python packages.
+[![PyPI - Version](https://img.shields.io/pypi/v/upstash-haystack.svg)](https://pypi.org/project/upstash-haystack)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/upstash-haystack.svg)](https://pypi.org/project/upstash-haystack)
+[![CI](https://github.com/avish006/upstash-haystack/actions/workflows/test.yml/badge.svg)](https://github.com/avish006/upstash-haystack/actions)
 
-For more details, see the Haystack documentation on [creating custom components](https://docs.haystack.deepset.ai/docs/custom-components) and [creating custom document stores](https://docs.haystack.deepset.ai/docs/creating-custom-document-stores).
+An integration of [Upstash Vector](https://upstash.com/vector) with [Haystack](https://haystack.deepset.ai/).
 
-## How to use this template
+## Features
 
-1. Click **[Use this template](https://github.com/deepset-ai/custom-component/generate)** to create a new repository.
+- **`UpstashDocumentStore`**: A scalable and serverless document store utilizing Upstash Vector.
+- **`UpstashEmbeddingRetriever`**: A dense retriever using the Upstash Vector integration.
+- **`UpstashHybridRetriever`**: A retriever that combines dense and sparse embeddings via Upstash Vector's native Reciprocal Rank Fusion (RRF) for superior search results.
 
-2. **Rename the package directory** from `src/haystack_integrations/components/example/` to match your integration. See [Namespace convention](#namespace-convention) below for the correct path.
+## Installation
 
-3. **Update `pyproject.toml`** — search for `TODO` comments and replace:
-   - `name`: your package name, following the `<technology>-haystack` convention (e.g. `opensearch-haystack`)
-   - `description`, `authors`, `keywords`, `project.urls`
-   - `dependencies`: add your integration-specific dependencies
-   - `tool.hatch.version.raw-options`: if you renamed directories, the version path is still derived from git tags so no change is needed here
+Install the package via pip:
 
-4. **Add your component code** in the renamed directory and export your classes from `__init__.py`.
-
-5. **Add tests** in `tests/` — see the skeleton in `tests/test_example.py`.
-
-6. **Search for all `TODO` comments** across the project and address them.
-
-Check out the [video walkthrough](https://www.youtube.com/watch?v=SWC0QecAMcI) for a step-by-step guide on how to use this template.
-
-## Namespace convention
-
-Haystack integrations use the `haystack_integrations` namespace package. The directory structure under `src/` determines the import path for your component.
-
-**Components** (converters, embedders, generators, rankers, etc.) use:
+```bash
+pip install upstash-haystack
 ```
-src/haystack_integrations/components/<type>/<name>/
-```
-Import path: `from haystack_integrations.components.<type>.<name> import MyComponent`
 
-Common component types: `converters`, `embedders`, `generators`, `rankers`, `retrievers`, `connectors`, `tools`, `websearch`
+## Quick Start
 
-**Document stores** use a separate namespace:
+### 1. Setup Upstash Vector
+Create an Upstash Vector index on the [Upstash Console](https://console.upstash.com/). You will need the `UPSTASH_VECTOR_REST_URL` and `UPSTASH_VECTOR_REST_TOKEN` from the console.
+
+Set them as environment variables:
+```bash
+export UPSTASH_VECTOR_REST_URL="https://your-endpoint.upstash.io"
+export UPSTASH_VECTOR_REST_TOKEN="your-token"
 ```
-src/haystack_integrations/document_stores/<name>/
+
+### 2. Basic Embedding Retrieval
+
+```python
+from haystack import Document
+from haystack_integrations.document_stores.upstash import UpstashDocumentStore
+from haystack_integrations.components.retrievers.upstash import UpstashEmbeddingRetriever
+
+# Initialize the Document Store
+document_store = UpstashDocumentStore()
+
+# Index some documents
+docs = [
+    Document(content="The capital of France is Paris.", embedding=[0.1, 0.2, 0.3]),
+    Document(content="The capital of Germany is Berlin.", embedding=[0.4, 0.5, 0.6]),
+]
+document_store.write_documents(docs)
+
+# Retrieve documents
+retriever = UpstashEmbeddingRetriever(document_store=document_store)
+result = retriever.run(query_embedding=[0.1, 0.2, 0.3], top_k=1)
+
+print(result["documents"])
 ```
-Import path: `from haystack_integrations.document_stores.<name> import MyDocumentStore`
+
+## Hybrid Retrieval
+
+Upstash Vector supports hybrid search using Reciprocal Rank Fusion (RRF). This integration natively supports it.
+
+```python
+from haystack.dataclasses import SparseEmbedding
+from haystack_integrations.components.retrievers.upstash import UpstashHybridRetriever
+
+retriever = UpstashHybridRetriever(document_store=document_store)
+
+sparse_query = SparseEmbedding(indices=[0, 2], values=[0.8, 0.2])
+dense_query = [0.1, 0.2, 0.3]
+
+result = retriever.run(query_embedding=dense_query, query_sparse_embedding=sparse_query, top_k=5)
+```
 
 ## Development
 
-This project uses [Hatch](https://hatch.pypa.io/) for build and environment management.
+To develop `upstash-haystack` locally, you need [Hatch](https://hatch.pypa.io/).
 
 ```bash
-# Install Hatch
-pip install hatch
+# Run formatters
+hatch run fmt
 
-# Format and lint
-hatch run fmt        # auto-fix
-hatch run fmt-check  # check only
+# Run type checks
+hatch run test:types
 
-# Run tests
-hatch run test:unit         # unit tests only
-hatch run test:integration  # integration tests only
-hatch run test:all          # all tests
-hatch run test:cov          # with coverage
+# Run unit tests
+hatch run test:unit
 ```
-
-## Publishing to PyPI
-
-This template includes a GitHub Actions workflow that publishes your package to PyPI when you push a version tag.
-
-1. **Add a `PYPI_API_TOKEN` secret** to your repository settings (Settings > Secrets and variables > Actions).
-
-2. **Create a version tag** and push it:
-   ```bash
-   git tag v0.1.0
-   git push origin v0.1.0
-   ```
-
-The release workflow will build and publish the package automatically.
 
 ## License
 
-`Apache-2.0` - See [LICENSE](LICENSE) for details.
+`upstash-haystack` is distributed under the terms of the [Apache-2.0](https://spdx.org/licenses/Apache-2.0.html) license.
