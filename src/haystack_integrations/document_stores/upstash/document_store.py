@@ -31,18 +31,29 @@ class UpstashDocumentStore:
     ) -> None:
         """
         Initializes the UpstashDocumentStore.
-
+    
         :param url: The URL of the Upstash Vector index.
         :param token: The REST token for the Upstash Vector index.
         """
         self.url = url
         self.token = token
-        url_val = url.resolve_value()
-        token_val = token.resolve_value()
-        if not isinstance(url_val, str) or not isinstance(token_val, str):
-            msg = "Upstash Vector URL and Token must be valid strings."
-            raise ValueError(msg)
-        self._index = Index(url=url_val, token=token_val)
+        self._index: Index | None = None  # lazily initialized on first use
+    
+    def _get_index(self) -> Index:
+        """
+        Lazily initializes and returns the Upstash Vector index client.
+    
+        :returns: The Upstash Vector Index client.
+        :raises ValueError: If the URL or token are not valid strings.
+        """
+        if self._index is None:
+            url_val = self.url.resolve_value()
+            token_val = self.token.resolve_value()
+            if not isinstance(url_val, str) or not isinstance(token_val, str):
+                msg = "Upstash Vector URL and Token must be valid strings."
+                raise ValueError(msg)
+            self._index = Index(url=url_val, token=token_val)
+        return self._index
 
     def to_dict(self) -> dict[str, Any]:
         """
@@ -73,7 +84,7 @@ class UpstashDocumentStore:
 
         :returns: The total number of documents in the Upstash Vector index.
         """
-        return self._index.info().vector_count
+        return self._get_index.info().vector_count
 
     def write_documents(
         self,
@@ -101,7 +112,7 @@ class UpstashDocumentStore:
 
         if policy in [DuplicatePolicy.SKIP, DuplicatePolicy.FAIL]:
             # Fetch existing to handle SKIP/FAIL
-            existing = self._index.fetch([doc.id for doc in documents])
+            existing = self._get_index.fetch([doc.id for doc in documents])
             existing_ids = [res.id for res in existing if res is not None]
             if existing_ids:
                 if policy == DuplicatePolicy.FAIL:
@@ -129,7 +140,7 @@ class UpstashDocumentStore:
 
         # Upsert in batches of 1000
         for i in range(0, len(vectors), 1000):
-            self._index.upsert(vectors=vectors[i : i + 1000])
+            self._get_index.upsert(vectors=vectors[i : i + 1000])
 
         return len(documents)
 
@@ -144,7 +155,7 @@ class UpstashDocumentStore:
 
         # Delete in batches
         for i in range(0, len(document_ids), 1000):
-            self._index.delete(document_ids[i : i + 1000])
+            self._get_index.delete(document_ids[i : i + 1000])
 
     def filter_documents(self, filters: dict[str, Any] | None = None) -> list[Document]:
         """
@@ -159,10 +170,10 @@ class UpstashDocumentStore:
         if filters:
             filter_str = _normalize_filters(filters)
 
-        dim = self._index.info().dimension
+        dim = self._get_index.info().dimension
         dummy_vector = [1.0] + [0.0] * (dim - 1)
 
-        results = self._index.query(
+        results = self._get_index.query(
             vector=dummy_vector,
             top_k=TOP_K_LIMIT,
             filter=filter_str,
