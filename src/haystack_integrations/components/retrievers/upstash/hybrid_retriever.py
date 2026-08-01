@@ -91,7 +91,7 @@ class UpstashHybridRetriever:
         # Parse query_sparse_embedding
         sparse_vec = (list(query_sparse_embedding.indices), list(query_sparse_embedding.values))
 
-        results = self.document_store._index.query(
+        results = self.document_store._get_index().query(
             vector=query_embedding,
             sparse_vector=sparse_vec,
             top_k=top_k,

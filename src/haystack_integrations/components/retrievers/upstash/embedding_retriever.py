@@ -84,7 +84,7 @@ class UpstashEmbeddingRetriever:
         if filters:
             filter_str = _normalize_filters(filters)
 
-        results = self.document_store._index.query(
+        results = self.document_store._get_index().query(
             vector=query_embedding,
             top_k=top_k,
             filter=filter_str,

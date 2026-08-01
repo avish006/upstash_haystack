@@ -22,7 +22,8 @@ from haystack_integrations.document_stores.upstash import UpstashDocumentStore
 def test_init_with_defaults(mock_index, monkeypatch):
     monkeypatch.setenv("UPSTASH_VECTOR_REST_URL", "http://test")
     monkeypatch.setenv("UPSTASH_VECTOR_REST_TOKEN", "test-token")
-    UpstashDocumentStore()
+    store = UpstashDocumentStore()
+    store._get_index()  # trigger lazy initialization
     mock_index.assert_called_once_with(url="http://test", token="test-token")
 
 
