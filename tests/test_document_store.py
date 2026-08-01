@@ -257,7 +257,8 @@ class TestUpstashDocumentStore:
     def test_write_documents_duplicate_skip(self, document_store):
         document_store.write_documents([self._doc(id="dup", content="original")])
         time.sleep(self.SLEEP)
-        written = document_store.write_documents([self._doc(id="dup", content="should not overwrite")], policy=DuplicatePolicy.SKIP)
+        doc2 = self._doc(id="dup", content="should not overwrite")
+        written = document_store.write_documents([doc2], policy=DuplicatePolicy.SKIP)
         assert written == 0
         time.sleep(self.SLEEP)
         result = document_store.filter_documents()
@@ -297,56 +298,60 @@ class TestUpstashDocumentStore:
     # ---- filter ----
 
     def test_no_filters(self, document_store):
-        document_store.write_documents([
-            self._doc(id="a", content="doc a"),
-            self._doc(id="b", content="doc b"),
-        ])
+        document_store.write_documents(
+            [
+                self._doc(id="a", content="doc a"),
+                self._doc(id="b", content="doc b"),
+            ]
+        )
         time.sleep(self.SLEEP)
         result = document_store.filter_documents()
         assert len(result) == 2
 
     def test_filter_by_meta_equal(self, document_store):
-        document_store.write_documents([
-            self._doc(id="match", content="yes", meta={"category": "A"}),
-            self._doc(id="no-match", content="no", meta={"category": "B"}),
-        ])
-        time.sleep(self.SLEEP)
-        result = document_store.filter_documents(
-            filters={"field": "meta.category", "operator": "==", "value": "A"}
+        document_store.write_documents(
+            [
+                self._doc(id="match", content="yes", meta={"category": "A"}),
+                self._doc(id="no-match", content="no", meta={"category": "B"}),
+            ]
         )
+        time.sleep(self.SLEEP)
+        result = document_store.filter_documents(filters={"field": "meta.category", "operator": "==", "value": "A"})
         assert len(result) == 1
         assert result[0].id == "match"
 
     def test_filter_by_meta_not_equal(self, document_store):
-        document_store.write_documents([
-            self._doc(id="a", content="a", meta={"category": "A"}),
-            self._doc(id="b", content="b", meta={"category": "B"}),
-        ])
-        time.sleep(self.SLEEP)
-        result = document_store.filter_documents(
-            filters={"field": "meta.category", "operator": "!=", "value": "A"}
+        document_store.write_documents(
+            [
+                self._doc(id="a", content="a", meta={"category": "A"}),
+                self._doc(id="b", content="b", meta={"category": "B"}),
+            ]
         )
+        time.sleep(self.SLEEP)
+        result = document_store.filter_documents(filters={"field": "meta.category", "operator": "!=", "value": "A"})
         assert len(result) == 1
         assert result[0].id == "b"
 
     def test_filter_by_meta_greater_than(self, document_store):
-        document_store.write_documents([
-            self._doc(id="low", content="low", meta={"score": 1}),
-            self._doc(id="high", content="high", meta={"score": 10}),
-        ])
-        time.sleep(self.SLEEP)
-        result = document_store.filter_documents(
-            filters={"field": "meta.score", "operator": ">", "value": 5}
+        document_store.write_documents(
+            [
+                self._doc(id="low", content="low", meta={"score": 1}),
+                self._doc(id="high", content="high", meta={"score": 10}),
+            ]
         )
+        time.sleep(self.SLEEP)
+        result = document_store.filter_documents(filters={"field": "meta.score", "operator": ">", "value": 5})
         assert len(result) == 1
         assert result[0].id == "high"
 
     def test_filter_by_meta_in(self, document_store):
-        document_store.write_documents([
-            self._doc(id="cat-a", content="cat a", meta={"category": "A"}),
-            self._doc(id="cat-b", content="cat b", meta={"category": "B"}),
-            self._doc(id="cat-c", content="cat c", meta={"category": "C"}),
-        ])
+        document_store.write_documents(
+            [
+                self._doc(id="cat-a", content="cat a", meta={"category": "A"}),
+                self._doc(id="cat-b", content="cat b", meta={"category": "B"}),
+                self._doc(id="cat-c", content="cat c", meta={"category": "C"}),
+            ]
+        )
         time.sleep(self.SLEEP)
         result = document_store.filter_documents(
             filters={"field": "meta.category", "operator": "in", "value": ["A", "B"]}
@@ -355,11 +360,13 @@ class TestUpstashDocumentStore:
         assert {d.id for d in result} == {"cat-a", "cat-b"}
 
     def test_filter_and_operator(self, document_store):
-        document_store.write_documents([
-            self._doc(id="ab", content="ab", meta={"category": "A", "score": 10}),
-            self._doc(id="a-low", content="a low", meta={"category": "A", "score": 1}),
-            self._doc(id="b-high", content="b high", meta={"category": "B", "score": 10}),
-        ])
+        document_store.write_documents(
+            [
+                self._doc(id="ab", content="ab", meta={"category": "A", "score": 10}),
+                self._doc(id="a-low", content="a low", meta={"category": "A", "score": 1}),
+                self._doc(id="b-high", content="b high", meta={"category": "B", "score": 10}),
+            ]
+        )
         time.sleep(self.SLEEP)
         result = document_store.filter_documents(
             filters={
@@ -374,11 +381,13 @@ class TestUpstashDocumentStore:
         assert result[0].id == "ab"
 
     def test_filter_or_operator(self, document_store):
-        document_store.write_documents([
-            self._doc(id="a", content="a", meta={"category": "A"}),
-            self._doc(id="b", content="b", meta={"category": "B"}),
-            self._doc(id="c", content="c", meta={"category": "C"}),
-        ])
+        document_store.write_documents(
+            [
+                self._doc(id="a", content="a", meta={"category": "A"}),
+                self._doc(id="b", content="b", meta={"category": "B"}),
+                self._doc(id="c", content="c", meta={"category": "C"}),
+            ]
+        )
         time.sleep(self.SLEEP)
         result = document_store.filter_documents(
             filters={
