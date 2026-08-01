@@ -87,9 +87,7 @@ print(result["documents"])
 
 ```python
 # Equality filter
-docs = document_store.filter_documents(
-    filters={"field": "meta.category", "operator": "==", "value": "science"}
-)
+docs = document_store.filter_documents(filters={"field": "meta.category", "operator": "==", "value": "science"})
 
 # AND operator
 docs = document_store.filter_documents(
