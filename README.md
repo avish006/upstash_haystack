@@ -1,7 +1,7 @@
 # upstash-haystack
 
-[![PyPI - Version](https://img.shields.io/pypi/v/upstash-haystack?color=blue&label=pypi)](https://pypi.org/project/upstash-haystack)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/upstash-haystack)](https://pypi.org/project/upstash-haystack)
+[![PyPI - Version](https://img.shields.io/pypi/v/upstash-haystack?color=blue&label=pypi&cacheSeconds=0)](https://pypi.org/project/upstash-haystack)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/upstash-haystack?cacheSeconds=0)](https://pypi.org/project/upstash-haystack)
 [![CI](https://github.com/avish006/upstash_haystack/actions/workflows/test.yml/badge.svg)](https://github.com/avish006/upstash_haystack/actions/workflows/test.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://spdx.org/licenses/Apache-2.0.html)
 
