@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
 name = "upstash-haystack"
-dynamic = ["version"]
+version = "0.1.1"
 description = "An integration of Upstash Vector with Haystack."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -44,11 +44,7 @@ Issues = "https://github.com/avish006/upstash-haystack/issues"
 Source = "https://github.com/avish006/upstash-haystack"
 
 [tool.hatch.version]
-source = "vcs"
-tag-pattern = "v(?P<version>.*)"
-
-[tool.hatch.version.raw-options]
-git_describe_command = 'git describe --tags --match="v[0-9]*"'
+path = "pyproject.toml"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/haystack_integrations"]
