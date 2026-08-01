@@ -31,18 +31,18 @@ class UpstashDocumentStore:
     ) -> None:
         """
         Initializes the UpstashDocumentStore.
-    
+
         :param url: The URL of the Upstash Vector index.
         :param token: The REST token for the Upstash Vector index.
         """
         self.url = url
         self.token = token
         self._index: Index | None = None  # lazily initialized on first use
-    
+
     def _get_index(self) -> Index:
         """
         Lazily initializes and returns the Upstash Vector index client.
-    
+
         :returns: The Upstash Vector Index client.
         :raises ValueError: If the URL or token are not valid strings.
         """
