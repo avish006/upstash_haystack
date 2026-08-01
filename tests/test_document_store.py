@@ -203,7 +203,7 @@ class TestUpstashDocumentStore:
     @pytest.fixture(autouse=True)
     def document_store(self):
         store = UpstashDocumentStore()
-        self._dim = store._index.info().dimension
+        self._dim = store._get_index().info().dimension
         self._store = store
 
         # Clear the index before every test
