@@ -47,6 +47,16 @@ jobs:
       - name: Unit tests
         run: hatch run test:unit
 
+      - name: Check secrets are available
+        env:
+          UPSTASH_VECTOR_REST_URL: ${{ secrets.UPSTASH_VECTOR_REST_URL }}
+          UPSTASH_VECTOR_REST_TOKEN: ${{ secrets.UPSTASH_VECTOR_REST_TOKEN }}
+        run: |
+          echo "URL set: $([ -n "$UPSTASH_VECTOR_REST_URL" ] && echo 'yes' || echo 'no')"
+          echo "TOKEN set: $([ -n "$UPSTASH_VECTOR_REST_TOKEN" ] && echo 'yes' || echo 'no')"
+          echo "URL length: ${#UPSTASH_VECTOR_REST_URL}"
+          echo "TOKEN length: ${#UPSTASH_VECTOR_REST_TOKEN}"
+
       - name: Integration tests
         env:
           UPSTASH_VECTOR_REST_URL: ${{ secrets.UPSTASH_VECTOR_REST_URL }}
