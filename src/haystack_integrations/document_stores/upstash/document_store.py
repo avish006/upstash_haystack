@@ -16,7 +16,7 @@ from .filters import _normalize_filters
 
 logger = logging.getLogger(__name__)
 
-TOP_K_LIMIT = 10_000
+TOP_K_LIMIT = 1000
 
 
 class UpstashDocumentStore:
@@ -173,7 +173,7 @@ class UpstashDocumentStore:
 
         if len(results) == TOP_K_LIMIT:
             logger.warning(
-                "Upstash Vector allows a maximum of 10,000 documents to be retrieved by a filter. "
+                "Upstash Vector allows a maximum of 1,000 documents to be retrieved by a filter. "
                 "The result might be truncated."
             )
 
